@@ -3,7 +3,8 @@ A simple GUI tool that allows for IPMI based management of a Dell R730XD in a ho
 
 Verified to work with Ubuntu 24.04LTS
 
-Requires the follow:
+Requires the following:
+
 IPMItool - Version 1.8.19
 https://github.com/ipmitool/ipmitool
 
