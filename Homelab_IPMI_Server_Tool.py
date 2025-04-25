@@ -11,200 +11,184 @@ frm.grid()
 
 #functions
 def power_on():
-    pipe = subprocess.Popen(["ipmitool", "-I", "lanplus", "-H", user_credentials[0], "-U", user_credentials[1],
-                             "-P", user_credentials[2], "power", "on"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    pipe = subprocess.run(["ipmitool", "-I", "lanplus", "-H", user_credentials[0], "-U", user_credentials[1],
+                             "-P", user_credentials[2], "power", "on"], capture_output=True)
     t = Text(root, width=65, height=5, bg='light gray')
     t.grid(column=0, row=12, pady=20)
-    result, err = pipe.communicate()
-    if not err:
-        t.insert("end", str(result.decode()))
+    if pipe.returncode == 0:
+        t.insert("end", str(pipe.stdout.decode()))
     else:
-        t.insert("1.0", str(err.decode()))
+        t.insert("1.0", str(pipe.stderr.decode()))
 
 def power_off():
-    pipe = subprocess.Popen(["ipmitool", "-I", "lanplus", "-H", user_credentials[0], "-U", user_credentials[1],
-                             "-P", user_credentials[2], "power", "off"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    pipe = subprocess.run(["ipmitool", "-I", "lanplus", "-H", user_credentials[0], "-U", user_credentials[1],
+                             "-P", user_credentials[2], "power", "off"], capture_output=True)
     t = Text(root, width=65, height=5, bg='light gray')
     t.delete("end")
     t.grid(column=0, row=12, pady=20)
-    result, err = pipe.communicate()
-    if not err:
-        t.insert("end", str(result.decode()))
+    if pipe.returncode == 0:
+        t.insert("end", str(pipe.stdout.decode()))
     else:
-        t.insert("1.0", str(err.decode()))
+        t.insert("1.0", str(pipe.stderr.decode()))
 
 def power_status():
-    pipe = subprocess.Popen(["ipmitool", "-I", "lanplus", "-H", user_credentials[0], "-U", user_credentials[1],
-            "-P", user_credentials[2], "power", "status"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    pipe = subprocess.run(["ipmitool", "-I", "lanplus", "-H", user_credentials[0], "-U", user_credentials[1],
+            "-P", user_credentials[2], "power", "status"], capture_output=True)
     t = Text(root, width=65, height=5, bg='light gray')
     t.grid(column=0, row=12, pady=20)
-    result, err = pipe.communicate()
-    if not err:
-        t.insert("1.0", str(result.decode()))
+    if pipe.returncode == 0:
+        t.insert("end", str(pipe.stdout.decode()))
     else:
-        t.insert("1.0", str(err.decode()))
+        t.insert("1.0", str(pipe.stderr.decode()))
 
 def default_pci_fans_off():
-    pipe = subprocess.Popen(["ipmitool", "-I", "lanplus", "-H", user_credentials[0], "-U", user_credentials[1],
+    pipe = subprocess.run(["ipmitool", "-I", "lanplus", "-H", user_credentials[0], "-U", user_credentials[1],
             "-P", user_credentials[2], "raw", "0x30", "0xce", "0x00", "0x16", "0x05", "0x00",
             "0x00", "0x00", "0x05", "0x00", "0x01", "0x00", "0x00"],
-            stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            capture_output=True)
     t = Text(root, width=65, height=5, bg='light gray')
     t.grid(column=0, row=12, pady=20)
-    result, err = pipe.communicate()
-    if not err:
-        t.insert("1.0", str(result.decode()))
+    if pipe.returncode == 0:
+        t.insert("end", str(pipe.stdout.decode()))
     else:
-        t.insert("1.0", str(err.decode()))
+        t.insert("1.0", str(pipe.stderr.decode()))
 
 def default_pci_fans_on():
-    pipe = subprocess.Popen(["ipmitool", "-I", "lanplus", "-H", user_credentials[0], "-U", user_credentials[1],
+    pipe = subprocess.run(["ipmitool", "-I", "lanplus", "-H", user_credentials[0], "-U", user_credentials[1],
             "-P", user_credentials[2], "raw", "0x30", "0xce", "0x00", "0x16", "0x05", "0x00",
             "0x00", "0x00", "0x05", "0x00", "0x00", "0x00", "0x00"],
-            stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                          capture_output=True)
     t = Text(root, width=65, height=5, bg='light gray')
     t.grid(column=0, row=12, pady=20)
-    result, err = pipe.communicate()
-    if not err:
-        t.insert("1.0", str(result.decode()))
+    if pipe.returncode == 0:
+        t.insert("end", str(pipe.stdout.decode()))
     else:
-        t.insert("1.0", str(err.decode()))
+        t.insert("1.0", str(pipe.stderr.decode()))
 
 def manual_fan_control_on():
-    pipe = subprocess.Popen(["ipmitool", "-I", "lanplus", "-H", user_credentials[0], "-U", user_credentials[1],
+    pipe = subprocess.run(["ipmitool", "-I", "lanplus", "-H", user_credentials[0], "-U", user_credentials[1],
             "-P", user_credentials[2], "raw", "0x30", "0x30", "0x01", "0x00"],
-            stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                          capture_output=True)
     t = Text(root, width=65, height=5, bg='light gray')
     t.grid(column=0, row=12, pady=20)
-    result, err = pipe.communicate()
-    if not err:
-        t.insert("1.0", str(result.decode()))
+    if pipe.returncode == 0:
+        t.insert("end", str(pipe.stdout.decode()))
     else:
-        t.insert("1.0", str(err.decode()))
+        t.insert("1.0", str(pipe.stderr.decode()))
 
 def manual_fan_control_off():
-    pipe = subprocess.Popen(["ipmitool", "-I", "lanplus", "-H", user_credentials[0], "-U", user_credentials[1],
+    pipe = subprocess.run(["ipmitool", "-I", "lanplus", "-H", user_credentials[0], "-U", user_credentials[1],
             "-P", user_credentials[2], "raw", "0x30", "0x30", "0x01", "0x01"],
-            stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                          capture_output=True)
     t = Text(root, width=65, height=5, bg='light gray')
     t.grid(column=0, row=12, pady=20)
-    result, err = pipe.communicate()
-    if not err:
-        t.insert("1.0", str(result.decode()))
+    if pipe.returncode == 0:
+        t.insert("end", str(pipe.stdout.decode()))
     else:
-        t.insert("1.0", str(err.decode()))
+        t.insert("1.0", str(pipe.stderr.decode()))
 
 def fans_2160():
-    pipe = subprocess.Popen(["ipmitool", "-I", "lanplus", "-H", user_credentials[0], "-U", user_credentials[1],
+    pipe = subprocess.run(["ipmitool", "-I", "lanplus", "-H", user_credentials[0], "-U", user_credentials[1],
             "-P", user_credentials[2], "raw", "0x30", "0x30", "0x02", "0xff", "0x00"],
-            stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                          capture_output=True)
     t = Text(root, width=65, height=5, bg='light gray')
     t.grid(column=0, row=12, pady=20)
-    result, err = pipe.communicate()
-    if not err:
-        t.insert("1.0", "Fans commanded to 2160rpm")
+    if pipe.returncode == 0:
+        t.insert("end", str(pipe.stdout.decode()))
     else:
-        t.insert("1.0", str(err.decode()))
+        t.insert("1.0", str(pipe.stderr.decode()))
 
 def fans_3840():
-    pipe = subprocess.Popen(["ipmitool", "-I", "lanplus", "-H", user_credentials[0], "-U", user_credentials[1],
+    pipe = subprocess.run(["ipmitool", "-I", "lanplus", "-H", user_credentials[0], "-U", user_credentials[1],
             "-P", user_credentials[2], "raw", "0x30", "0x30", "0x02", "0xff", "0x0a"],
-            stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                          capture_output=True)
     t = Text(root, width=65, height=5, bg='light gray')
     t.grid(column=0, row=12, pady=20)
-    result, err = pipe.communicate()
-    if not err:
-        t.insert("1.0", "Fans commanded to 3840rpm")
+    if pipe.returncode == 0:
+        t.insert("end", str(pipe.stdout.decode()))
     else:
-        t.insert("1.0", str(err.decode()))
+        t.insert("1.0", str(pipe.stderr.decode()))
 
 def fans_5880():
-    pipe = subprocess.Popen(["ipmitool", "-I", "lanplus", "-H", user_credentials[0], "-U", user_credentials[1],
+    pipe = subprocess.run(["ipmitool", "-I", "lanplus", "-H", user_credentials[0], "-U", user_credentials[1],
             "-P", user_credentials[2], "raw", "0x30", "0x30", "0x02", "0xff", "0x19"],
-            stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                          capture_output=True)
     t = Text(root, width=65, height=5, bg='light gray')
     t.grid(column=0, row=12, pady=20)
-    result, err = pipe.communicate()
-    if not err:
-        t.insert("1.0", "Fans commanded to 5880rpm")
+    if pipe.returncode == 0:
+        t.insert("end", str(pipe.stdout.decode()))
     else:
-        t.insert("1.0", str(err.decode()))
+        t.insert("1.0", str(pipe.stderr.decode()))
 
 def fans_8520():
-    pipe = subprocess.Popen(["ipmitool", "-I", "lanplus", "-H", user_credentials[0], "-U", user_credentials[1],
+    pipe = subprocess.run(["ipmitool", "-I", "lanplus", "-H", user_credentials[0], "-U", user_credentials[1],
             "-P", user_credentials[2], "raw", "0x30", "0x30", "0x02", "0xff", "0x29"],
-            stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                          capture_output=True)
     t = Text(root, width=65, height=5, bg='light gray')
     t.grid(column=0, row=12, pady=20)
-    result, err = pipe.communicate()
-    if not err:
-        t.insert("1.0", "Fans commanded to 8520rpm")
+    if pipe.returncode == 0:
+        t.insert("end", str(pipe.stdout.decode()))
     else:
-        t.insert("1.0", str(err.decode()))
+        t.insert("1.0", str(pipe.stderr.decode()))
 
 def fans_10920():
-    pipe = subprocess.Popen(["ipmitool", "-I", "lanplus", "-H", user_credentials[0], "-U", user_credentials[1],
+    pipe = subprocess.run(["ipmitool", "-I", "lanplus", "-H", user_credentials[0], "-U", user_credentials[1],
             "-P", user_credentials[2], "raw", "0x30", "0x30", "0x02", "0xff", "0x39"],
-            stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                          capture_output=True)
     t = Text(root, width=65, height=5, bg='light gray')
     t.grid(column=0, row=12, pady=20)
-    result, err = pipe.communicate()
-    if not err:
-        t.insert("1.0", "Fans commanded to 10920rpm")
+    if pipe.returncode == 0:
+        t.insert("end", str(pipe.stdout.decode()))
     else:
-        t.insert("1.0", str(err.decode()))
+        t.insert("1.0", str(pipe.stderr.decode()))
 
 def fans_13000():
-    pipe = subprocess.Popen(["ipmitool", "-I", "lanplus", "-H", user_credentials[0], "-U", user_credentials[1],
+    pipe = subprocess.run(["ipmitool", "-I", "lanplus", "-H", user_credentials[0], "-U", user_credentials[1],
             "-P", user_credentials[2], "raw", "0x30", "0x30", "0x02", "0xff", "0x49"],
-            stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                          capture_output=True)
     t = Text(root, width=65, height=5, bg='light gray')
     t.grid(column=0, row=12, pady=20)
-    result, err = pipe.communicate()
-    if not err:
-        t.insert("1.0", "Fans commanded to 13000rpm")
+    if pipe.returncode == 0:
+        t.insert("end", str(pipe.stdout.decode()))
     else:
-        t.insert("1.0", str(err.decode()))
+        t.insert("1.0", str(pipe.stderr.decode()))
 
 def fans_15600():
-    pipe = subprocess.Popen(["ipmitool", "-I", "lanplus", "-H", user_credentials[0], "-U", user_credentials[1],
+    pipe = subprocess.run(["ipmitool", "-I", "lanplus", "-H", user_credentials[0], "-U", user_credentials[1],
             "-P", user_credentials[2], "raw", "0x30", "0x30", "0x02", "0xff", "0x59"],
-            stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                          capture_output=True)
     t = Text(root, width=65, height=5, bg='light gray')
     t.grid(column=0, row=12, pady=20)
-    result, err = pipe.communicate()
-    if not err:
-        t.insert("1.0", "Fans commanded to 15600rpm")
+    if pipe.returncode == 0:
+        t.insert("end", str(pipe.stdout.decode()))
     else:
-        t.insert("1.0", str(err.decode()))
+        t.insert("1.0", str(pipe.stderr.decode()))
 
 def fans_17640():
-    pipe = subprocess.Popen(["ipmitool", "-I", "lanplus", "-H", user_credentials[0], "-U", user_credentials[1],
+    pipe = subprocess.run(["ipmitool", "-I", "lanplus", "-H", user_credentials[0], "-U", user_credentials[1],
             "-P", user_credentials[2], "raw", "0x30", "0x30", "0x02", "0xff", "0x64"],
-            stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                          capture_output=True)
     t = Text(root, width=65, height=5, bg='light gray')
     t.grid(column=0, row=12, pady=20)
-    result, err = pipe.communicate()
-    if not err:
-        t.insert("1.0", "Fans commanded to 17640rpm")
+    if pipe.returncode == 0:
+        t.insert("end", str(pipe.stdout.decode()))
     else:
-        t.insert("1.0", str(err.decode()))
+        t.insert("1.0", str(pipe.stderr.decode()))
 
 def get_stats():
-    command = subprocess.Popen(["ipmi-sensors", "-h", user_credentials[0], "-u", user_credentials[1],
+    pipe = subprocess.run(["ipmi-sensors", "-h", user_credentials[0], "-u", user_credentials[1],
             "-p",user_credentials[2], "-l", "user", "-D", "LAN_2_0", "--record-ids=14,15,16,17,18,19,20,25,26,27,98"],
-            stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    output = command.stdout.read().decode()
-    t = Text(root, width=65, height=13, bg='light gray')
+                          capture_output=True)
+    output = pipe.stdout.decode()
+    t = Text(root, width=65, height=12, bg='light gray')
     t.grid(column=0, row=8, pady=20)
     t.insert("1.0", output) # can also use "end"
     root.after(4000, get_stats)
     ttk.Label(text="System stats update every 4 seconds...", anchor=CENTER).grid(column=0, row=1)
-    result, err = command.communicate()
-    if not err:
-        t.insert("1.0", str(result.decode()))
+    if pipe.returncode == 0:
+        t.insert("end", str(pipe.stdout.decode()))
     else:
-        t.insert("1.0", str(err.decode()))
+        t.insert("1.0", str(pipe.stderr.decode()))
 
 def auto_fan_control():
     try:
@@ -221,11 +205,11 @@ def auto_fan_control():
             b16.config(state='disabled')
             b17.config(state='disabled')
 
-            command = subprocess.Popen(
+            pipe = subprocess.run(
         ["ipmi-sensors", "-h", user_credentials[0], "-u", user_credentials[1], "-p", user_credentials[2],
          "-l", "user", "-D", "LAN_2_0",
-         "--record-ids=14,15,16,17,18,19,20,25,26,27,98"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            output = command.stdout.read().decode()
+         "--record-ids=14,15,16,17,18,19,20,25,26,27,98"],  capture_output=True)
+            output = pipe.stdout.decode()
             cpu_temp1 = int(output[605:607])
 
             if 0 <= cpu_temp1 < 30:
@@ -332,7 +316,7 @@ def switch_button_state_on():
 def about():
     file_window = Toplevel(root)
     file_window.geometry('150x50')
-    ttk.Label(file_window, text="Version 1.00", anchor=CENTER).grid(column=0, row=0)
+    ttk.Label(file_window, text="Version 1.01", anchor=CENTER).grid(column=0, row=0)
     ttk.Label(file_window, text="Created by Aaron Riggs", anchor=CENTER).grid(column=0, row=1)
 
 #user credentials
