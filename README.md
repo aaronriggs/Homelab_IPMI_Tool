@@ -1,6 +1,8 @@
 # Homelab_IPMI_Tool
 A simple GUI tool that allows for IPMI based management of a Dell R730XD in a homelab. 
 
+![Image](https://github.com/user-attachments/assets/17a0c523-b942-4262-9175-ca99f3f933e6)
+
 Verified to work with Ubuntu 24.04LTS
 
 Requires the following:
