@@ -13,4 +13,14 @@ https://github.com/ipmitool/ipmitool
 FreeIPMI - Version 1.6.13
 https://www.gnu.org/software/freeipmi/
 
-Please bear with me as I upload additional details and bug fixes. 
+
+
+
+
+
+Current Development:
+
+
+Please bear with me as I upload additional documentation, features and bug fixes. 
+
+Currently working to make this MacOS compatible. 
