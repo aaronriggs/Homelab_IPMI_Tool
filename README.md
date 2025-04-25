@@ -3,7 +3,7 @@ A simple GUI tool that allows for IPMI based management of a Dell R730XD in a ho
 
 ![Image](https://github.com/user-attachments/assets/1aab9510-3c8d-4770-acc5-3228ecf5c5cb)
 
-Verified to work with Ubuntu 24.04LTS
+Verified to work with Ubuntu 24.04LTS and Mac OS 15.3.2
 
 Requires the following:
 
