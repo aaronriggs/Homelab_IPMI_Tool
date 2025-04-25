@@ -30,3 +30,5 @@ Current Development:
 Please bear with me as I upload additional documentation, features and bug fixes. 
 
 Currently working to make this MacOS compatible. 
+
+Ultimate project goal: Allow user defined profiles for any server managed over a network. 
