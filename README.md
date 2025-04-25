@@ -5,6 +5,8 @@ Verified to work with Ubuntu 24.04LTS
 
 Requires the following:
 
+Python 3.12.3
+
 IPMItool - Version 1.8.19
 https://github.com/ipmitool/ipmitool
 
