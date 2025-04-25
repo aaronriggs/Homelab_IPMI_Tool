@@ -8,36 +8,38 @@ root = Tk()
 root.title("Homelab IPMI Server Management Tool")
 frm = ttk.Frame(root, padding=20)
 frm.grid()
+textbox_bg_color = "white"
+text_font_color = "black"
 
 #functions
 def power_on():
     pipe = subprocess.run(["ipmitool", "-I", "lanplus", "-H", user_credentials[0], "-U", user_credentials[1],
                              "-P", user_credentials[2], "power", "on"], capture_output=True)
-    t = Text(root, width=65, height=5, bg='light gray')
+    t = Text(root, width=65, height=5, bg=textbox_bg_color, fg=text_font_color)
     t.grid(column=0, row=12, pady=20)
     if pipe.returncode == 0:
-        t.insert("end", str(pipe.stdout.decode()))
+        t.insert("1.0", str(pipe.stdout.decode()))
     else:
         t.insert("1.0", str(pipe.stderr.decode()))
 
 def power_off():
     pipe = subprocess.run(["ipmitool", "-I", "lanplus", "-H", user_credentials[0], "-U", user_credentials[1],
                              "-P", user_credentials[2], "power", "off"], capture_output=True)
-    t = Text(root, width=65, height=5, bg='light gray')
-    t.delete("end")
+    t = Text(root, width=65, height=5, bg=textbox_bg_color, fg=text_font_color)
+    t.delete("end") #what is this
     t.grid(column=0, row=12, pady=20)
     if pipe.returncode == 0:
-        t.insert("end", str(pipe.stdout.decode()))
+        t.insert("1.0", str(pipe.stdout.decode()))
     else:
         t.insert("1.0", str(pipe.stderr.decode()))
 
 def power_status():
     pipe = subprocess.run(["ipmitool", "-I", "lanplus", "-H", user_credentials[0], "-U", user_credentials[1],
             "-P", user_credentials[2], "power", "status"], capture_output=True)
-    t = Text(root, width=65, height=5, bg='light gray')
+    t = Text(root, width=65, height=5, bg=textbox_bg_color, fg=text_font_color)
     t.grid(column=0, row=12, pady=20)
     if pipe.returncode == 0:
-        t.insert("end", str(pipe.stdout.decode()))
+        t.insert("1.0", str(pipe.stdout.decode()))
     else:
         t.insert("1.0", str(pipe.stderr.decode()))
 
@@ -46,10 +48,10 @@ def default_pci_fans_off():
             "-P", user_credentials[2], "raw", "0x30", "0xce", "0x00", "0x16", "0x05", "0x00",
             "0x00", "0x00", "0x05", "0x00", "0x01", "0x00", "0x00"],
             capture_output=True)
-    t = Text(root, width=65, height=5, bg='light gray')
+    t = Text(root, width=65, height=5, bg=textbox_bg_color, fg=text_font_color)
     t.grid(column=0, row=12, pady=20)
     if pipe.returncode == 0:
-        t.insert("end", str(pipe.stdout.decode()))
+        t.insert("1.0", str(pipe.stdout.decode()))
     else:
         t.insert("1.0", str(pipe.stderr.decode()))
 
@@ -58,10 +60,10 @@ def default_pci_fans_on():
             "-P", user_credentials[2], "raw", "0x30", "0xce", "0x00", "0x16", "0x05", "0x00",
             "0x00", "0x00", "0x05", "0x00", "0x00", "0x00", "0x00"],
                           capture_output=True)
-    t = Text(root, width=65, height=5, bg='light gray')
+    t = Text(root, width=65, height=5, bg=textbox_bg_color, fg=text_font_color)
     t.grid(column=0, row=12, pady=20)
     if pipe.returncode == 0:
-        t.insert("end", str(pipe.stdout.decode()))
+        t.insert("1.0", str(pipe.stdout.decode()))
     else:
         t.insert("1.0", str(pipe.stderr.decode()))
 
@@ -69,10 +71,10 @@ def manual_fan_control_on():
     pipe = subprocess.run(["ipmitool", "-I", "lanplus", "-H", user_credentials[0], "-U", user_credentials[1],
             "-P", user_credentials[2], "raw", "0x30", "0x30", "0x01", "0x00"],
                           capture_output=True)
-    t = Text(root, width=65, height=5, bg='light gray')
+    t = Text(root, width=65, height=5, bg=textbox_bg_color, fg=text_font_color)
     t.grid(column=0, row=12, pady=20)
     if pipe.returncode == 0:
-        t.insert("end", str(pipe.stdout.decode()))
+        t.insert("1.0", str(pipe.stdout.decode()))
     else:
         t.insert("1.0", str(pipe.stderr.decode()))
 
@@ -80,10 +82,10 @@ def manual_fan_control_off():
     pipe = subprocess.run(["ipmitool", "-I", "lanplus", "-H", user_credentials[0], "-U", user_credentials[1],
             "-P", user_credentials[2], "raw", "0x30", "0x30", "0x01", "0x01"],
                           capture_output=True)
-    t = Text(root, width=65, height=5, bg='light gray')
+    t = Text(root, width=65, height=5, bg=textbox_bg_color, fg=text_font_color)
     t.grid(column=0, row=12, pady=20)
     if pipe.returncode == 0:
-        t.insert("end", str(pipe.stdout.decode()))
+        t.insert("1.0", str(pipe.stdout.decode()))
     else:
         t.insert("1.0", str(pipe.stderr.decode()))
 
@@ -91,10 +93,10 @@ def fans_2160():
     pipe = subprocess.run(["ipmitool", "-I", "lanplus", "-H", user_credentials[0], "-U", user_credentials[1],
             "-P", user_credentials[2], "raw", "0x30", "0x30", "0x02", "0xff", "0x00"],
                           capture_output=True)
-    t = Text(root, width=65, height=5, bg='light gray')
+    t = Text(root, width=65, height=5, bg=textbox_bg_color, fg=text_font_color)
     t.grid(column=0, row=12, pady=20)
     if pipe.returncode == 0:
-        t.insert("end", str(pipe.stdout.decode()))
+        t.insert("1.0", "Fans commanded to 2160rpm")
     else:
         t.insert("1.0", str(pipe.stderr.decode()))
 
@@ -102,10 +104,10 @@ def fans_3840():
     pipe = subprocess.run(["ipmitool", "-I", "lanplus", "-H", user_credentials[0], "-U", user_credentials[1],
             "-P", user_credentials[2], "raw", "0x30", "0x30", "0x02", "0xff", "0x0a"],
                           capture_output=True)
-    t = Text(root, width=65, height=5, bg='light gray')
+    t = Text(root, width=65, height=5, bg=textbox_bg_color, fg=text_font_color)
     t.grid(column=0, row=12, pady=20)
     if pipe.returncode == 0:
-        t.insert("end", str(pipe.stdout.decode()))
+        t.insert("1.0", "Fans commanded to 3840rpm")
     else:
         t.insert("1.0", str(pipe.stderr.decode()))
 
@@ -113,10 +115,10 @@ def fans_5880():
     pipe = subprocess.run(["ipmitool", "-I", "lanplus", "-H", user_credentials[0], "-U", user_credentials[1],
             "-P", user_credentials[2], "raw", "0x30", "0x30", "0x02", "0xff", "0x19"],
                           capture_output=True)
-    t = Text(root, width=65, height=5, bg='light gray')
+    t = Text(root, width=65, height=5, bg=textbox_bg_color, fg=text_font_color)
     t.grid(column=0, row=12, pady=20)
     if pipe.returncode == 0:
-        t.insert("end", str(pipe.stdout.decode()))
+        t.insert("1.0", "Fans commanded to 5880rpm")
     else:
         t.insert("1.0", str(pipe.stderr.decode()))
 
@@ -124,10 +126,10 @@ def fans_8520():
     pipe = subprocess.run(["ipmitool", "-I", "lanplus", "-H", user_credentials[0], "-U", user_credentials[1],
             "-P", user_credentials[2], "raw", "0x30", "0x30", "0x02", "0xff", "0x29"],
                           capture_output=True)
-    t = Text(root, width=65, height=5, bg='light gray')
+    t = Text(root, width=65, height=5, bg=textbox_bg_color, fg=text_font_color)
     t.grid(column=0, row=12, pady=20)
     if pipe.returncode == 0:
-        t.insert("end", str(pipe.stdout.decode()))
+        t.insert("1.0", "Fans commanded to 8520rpm")
     else:
         t.insert("1.0", str(pipe.stderr.decode()))
 
@@ -135,10 +137,10 @@ def fans_10920():
     pipe = subprocess.run(["ipmitool", "-I", "lanplus", "-H", user_credentials[0], "-U", user_credentials[1],
             "-P", user_credentials[2], "raw", "0x30", "0x30", "0x02", "0xff", "0x39"],
                           capture_output=True)
-    t = Text(root, width=65, height=5, bg='light gray')
+    t = Text(root, width=65, height=5, bg=textbox_bg_color, fg=text_font_color)
     t.grid(column=0, row=12, pady=20)
     if pipe.returncode == 0:
-        t.insert("end", str(pipe.stdout.decode()))
+        t.insert("1.0", "Fans commanded to 10920rpm")
     else:
         t.insert("1.0", str(pipe.stderr.decode()))
 
@@ -146,10 +148,10 @@ def fans_13000():
     pipe = subprocess.run(["ipmitool", "-I", "lanplus", "-H", user_credentials[0], "-U", user_credentials[1],
             "-P", user_credentials[2], "raw", "0x30", "0x30", "0x02", "0xff", "0x49"],
                           capture_output=True)
-    t = Text(root, width=65, height=5, bg='light gray')
+    t = Text(root, width=65, height=5, bg=textbox_bg_color, fg=text_font_color)
     t.grid(column=0, row=12, pady=20)
     if pipe.returncode == 0:
-        t.insert("end", str(pipe.stdout.decode()))
+        t.insert("1.0", "Fans commanded to 13000rpm")
     else:
         t.insert("1.0", str(pipe.stderr.decode()))
 
@@ -157,10 +159,10 @@ def fans_15600():
     pipe = subprocess.run(["ipmitool", "-I", "lanplus", "-H", user_credentials[0], "-U", user_credentials[1],
             "-P", user_credentials[2], "raw", "0x30", "0x30", "0x02", "0xff", "0x59"],
                           capture_output=True)
-    t = Text(root, width=65, height=5, bg='light gray')
+    t = Text(root, width=65, height=5, bg=textbox_bg_color, fg=text_font_color)
     t.grid(column=0, row=12, pady=20)
     if pipe.returncode == 0:
-        t.insert("end", str(pipe.stdout.decode()))
+        t.insert("1.0", "Fans commanded to 15600rpm")
     else:
         t.insert("1.0", str(pipe.stderr.decode()))
 
@@ -168,10 +170,10 @@ def fans_17640():
     pipe = subprocess.run(["ipmitool", "-I", "lanplus", "-H", user_credentials[0], "-U", user_credentials[1],
             "-P", user_credentials[2], "raw", "0x30", "0x30", "0x02", "0xff", "0x64"],
                           capture_output=True)
-    t = Text(root, width=65, height=5, bg='light gray')
+    t = Text(root, width=65, height=5, bg=textbox_bg_color, fg=text_font_color)
     t.grid(column=0, row=12, pady=20)
     if pipe.returncode == 0:
-        t.insert("end", str(pipe.stdout.decode()))
+        t.insert("1.0", "Fans commanded to 17640rpm")
     else:
         t.insert("1.0", str(pipe.stderr.decode()))
 
@@ -180,13 +182,13 @@ def get_stats():
             "-p",user_credentials[2], "-l", "user", "-D", "LAN_2_0", "--record-ids=14,15,16,17,18,19,20,25,26,27,98"],
                           capture_output=True)
     output = pipe.stdout.decode()
-    t = Text(root, width=65, height=12, bg='light gray')
+    t = Text(root, width=65, height=12, bg=textbox_bg_color, fg=text_font_color)
     t.grid(column=0, row=8, pady=20)
     t.insert("1.0", output) # can also use "end"
     root.after(4000, get_stats)
     ttk.Label(text="System stats update every 4 seconds...", anchor=CENTER).grid(column=0, row=1)
     if pipe.returncode == 0:
-        t.insert("end", str(pipe.stdout.decode()))
+        t.insert("1.0", str(pipe.stdout.decode()))
     else:
         t.insert("1.0", str(pipe.stderr.decode()))
 
@@ -214,49 +216,49 @@ def auto_fan_control():
 
             if 0 <= cpu_temp1 < 30:
                 fans_2160()
-                t = Text(root, width=65, height=5, bg='light gray')
+                t = Text(root, width=65, height=5, bg=textbox_bg_color, fg=text_font_color)
                 t.grid(column=0, row=12, pady=20)
                 t.insert("1.0", "Auto fan control active at 2160")
 
             elif 31 <= cpu_temp1 < 39:
                 fans_3840()
-                t = Text(root, width=65, height=5, bg='light gray')
+                t = Text(root, width=65, height=5, bg=textbox_bg_color, fg=text_font_color)
                 t.grid(column=0, row=12, pady=20)
                 t.insert("1.0", "Auto fan control active at 3840rpm")
 
             elif 40 <= cpu_temp1 < 44:
                 fans_5880()
-                t = Text(root, width=65, height=5, bg='light gray')
+                t = Text(root, width=65, height=5, bg=textbox_bg_color, fg=text_font_color)
                 t.grid(column=0, row=12, pady=20)
                 t.insert("1.0", "Auto fan control active at 5880rpm")
 
             elif 45 <= cpu_temp1 < 49:
                 fans_8520()
-                t = Text(root, width=65, height=5, bg='light gray')
+                t = Text(root, width=65, height=5, bg=textbox_bg_color, fg=text_font_color)
                 t.grid(column=0, row=12, pady=20)
                 t.insert("1.0", "Auto fan control active at 8520rpm")
 
             elif 50 <= cpu_temp1 < 54:
                 fans_10920()
-                t = Text(root, width=65, height=5, bg='light gray')
+                t = Text(root, width=65, height=5, bg=textbox_bg_color, fg=text_font_color)
                 t.grid(column=0, row=12, pady=20)
                 t.insert("1.0", "Auto fan control active at 10920rpm")
 
             elif 55 <= cpu_temp1 < 59:
                 fans_13000()
-                t = Text(root, width=65, height=5, bg='light gray')
+                t = Text(root, width=65, height=5, bg=textbox_bg_color, fg=text_font_color)
                 t.grid(column=0, row=12, pady=20)
                 t.insert("1.0", "Auto fan control active at 13000rpm")
 
             elif 60 <= cpu_temp1 < 64:
                 fans_15600()
-                t = Text(root, width=65, height=5, bg='light gray')
+                t = Text(root, width=65, height=5, bg=textbox_bg_color, fg=text_font_color)
                 t.grid(column=0, row=12, pady=20)
                 t.insert("1.0", "Auto fan control active at 15600rpm")
 
             elif cpu_temp1  >= 65:
                 fans_17640()
-                t = Text(root, width=65, height=5, bg='light gray')
+                t = Text(root, width=65, height=5, bg=textbox_bg_color, fg=text_font_color)
                 t.grid(column=0, row=12, pady=20)
                 t.insert("1.0", "Auto fan control active at 17640rpm")
 
@@ -265,13 +267,13 @@ def auto_fan_control():
             root.after(4000, auto_fan_control)
 
     except ValueError:
-            t = Text(root, width=65, height=5, bg='light gray')
+            t = Text(root, width=65, height=5, bg=textbox_bg_color, fg=text_font_color)
             t.grid(column=0, row=12, pady=20)
             t.insert("1.0", "CPU Temp is not currently active. Is the system on?")
             pass
 
 def fans_to_manual():
-    t = Text(root, width=65, height=5, bg='light gray')
+    t = Text(root, width=65, height=5, bg=textbox_bg_color, fg=text_font_color)
     t.grid(column=0, row=12, pady=20)
     t.insert("1.0", "Fan speed under user control")
     b10.config(state='NORMAL')
@@ -316,7 +318,7 @@ def switch_button_state_on():
 def about():
     file_window = Toplevel(root)
     file_window.geometry('150x50')
-    ttk.Label(file_window, text="Version 1.01", anchor=CENTER).grid(column=0, row=0)
+    ttk.Label(file_window, text="Version 1.02", anchor=CENTER).grid(column=0, row=0)
     ttk.Label(file_window, text="Created by Aaron Riggs", anchor=CENTER).grid(column=0, row=1)
 
 #user credentials
