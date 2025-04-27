@@ -1,5 +1,7 @@
 import tkinter
+import threading
 import subprocess
+from threading import Thread
 from tkinter import ttk
 from tkinter import Text, Radiobutton, Menu, IntVar, Toplevel, CENTER, NORMAL, Tk
 
@@ -177,6 +179,13 @@ def fans_17640():
     else:
         t.insert("1.0", str(pipe.stderr.decode()))
 
+def get_stats_thread():
+    t1=Thread(target=get_stats)
+    t1.start()
+    print("Get stats thread started")
+    mythreads = threading.enumerate()
+    print(mythreads)
+
 def get_stats():
     pipe = subprocess.run(["ipmi-sensors", "-h", user_credentials[0], "-u", user_credentials[1],
             "-p",user_credentials[2], "-l", "user", "-D", "LAN_2_0", "--record-ids=14,15,16,17,18,19,20,25,26,27,98"],
@@ -185,7 +194,7 @@ def get_stats():
     t = Text(root, width=65, height=12, bg=textbox_bg_color, fg=text_font_color)
     t.grid(column=0, row=8, pady=20)
     t.insert("1.0", output) # can also use "end"
-    root.after(4000, get_stats)
+    root.after(4000, get_stats_thread)
     ttk.Label(text="System stats update every 4 seconds...", anchor=CENTER).grid(column=0, row=1)
     if pipe.returncode == 0:
         t.insert("1.0", str(pipe.stdout.decode()))
@@ -213,6 +222,10 @@ def auto_fan_control():
          "--record-ids=14,15,16,17,18,19,20,25,26,27,98"],  capture_output=True)
             output = pipe.stdout.decode()
             cpu_temp1 = int(output[605:607])
+
+            t = Text(root, width=65, height=5, bg=textbox_bg_color, fg=text_font_color)
+            t.grid(column=0, row=12, pady=20)
+            t.insert("1.0", "Auto fan control on")
 
             if 0 <= cpu_temp1 < 30:
                 fans_2160()
@@ -318,7 +331,7 @@ def switch_button_state_on():
 def about():
     file_window = Toplevel(root)
     file_window.geometry('150x50')
-    ttk.Label(file_window, text="Version 1.02", anchor=CENTER).grid(column=0, row=0)
+    ttk.Label(file_window, text="Version 1.04", anchor=CENTER).grid(column=0, row=0)
     ttk.Label(file_window, text="Created by Aaron Riggs", anchor=CENTER).grid(column=0, row=1)
 
 #user credentials
@@ -340,7 +353,7 @@ b3 = ttk.Button(frm, text="Power On ", width=11, state="disabled", command=power
 b3.grid(column=2, row=0, padx=10)
 b4 = ttk.Button(frm, text="Power Off", width=11, command=power_off, state="disabled")
 b4.grid(column=2, row=1)
-b5 = ttk.Button(frm, text="System Stats", width=11, command=get_stats, state="disabled")
+b5 = ttk.Button(frm, text="System Stats", width=11, command=get_stats_thread, state="disabled")
 b5.grid(column=0, row=6)
 b6 = ttk.Button(frm, text="Default Dell PCI-E Cooling On", width=30, command=default_pci_fans_on, state="disabled")
 b6.grid(column=3, row=0, padx=5)
