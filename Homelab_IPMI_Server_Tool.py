@@ -182,9 +182,6 @@ def fans_17640():
 def get_stats_thread():
     t1=Thread(target=get_stats)
     t1.start()
-    print("Get stats thread started")
-    mythreads = threading.enumerate()
-    print(mythreads)
 
 def get_stats():
     pipe = subprocess.run(["ipmi-sensors", "-h", user_credentials[0], "-u", user_credentials[1],
