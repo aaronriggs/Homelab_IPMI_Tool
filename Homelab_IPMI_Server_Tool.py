@@ -1,6 +1,5 @@
-import tkinter
-import threading
 import subprocess
+import threading
 from threading import Thread
 from tkinter import ttk
 from tkinter import Text, Radiobutton, Menu, IntVar, Toplevel, CENTER, NORMAL, Tk
@@ -10,7 +9,7 @@ root = Tk()
 root.title("Homelab IPMI Server Management Tool")
 frm = ttk.Frame(root, padding=20)
 frm.grid()
-textbox_bg_color = "white"
+textbox_bg_color= "white"
 text_font_color = "black"
 
 #functions
@@ -182,6 +181,8 @@ def fans_17640():
 def get_stats_thread():
     t1=Thread(target=get_stats)
     t1.start()
+    # mythreads = threading.enumerate()
+    # print(mythreads)
 
 def get_stats():
     pipe = subprocess.run(["ipmi-sensors", "-h", user_credentials[0], "-u", user_credentials[1],
@@ -198,12 +199,16 @@ def get_stats():
     else:
         t.insert("1.0", str(pipe.stderr.decode()))
 
+def auto_fan_control_thread():
+    t2=Thread(target=auto_fan_control)
+    t2.start()
+
 def auto_fan_control():
     try:
         if user_selected_fan_curve.get() == 1:
             return
         else:
-            #disable user selectable fan speeds if auto fan control is on
+            #disable user selectable fan speeds if auto fan control is selected
             b10.config(state='disabled')
             b11.config(state='disabled')
             b12.config(state='disabled')
@@ -219,73 +224,81 @@ def auto_fan_control():
          "--record-ids=14,15,16,17,18,19,20,25,26,27,98"],  capture_output=True)
             output = pipe.stdout.decode()
             cpu_temp1 = int(output[605:607])
+            #cpu_temp2 = int(output[668:670]) #cpu 2 temp
+            #possible issue exists where cpu1 or cpu2 may not be populated in the motherboard
+            """1 degree temperature gap between fan speeds stops constant fan speed 
+            increase/decrease by allowing temp to dip into
+            next temperature range BEFORE changing fan speed"""
 
-            t = Text(root, width=65, height=5, bg=textbox_bg_color, fg=text_font_color)
-            t.grid(column=0, row=12, pady=20)
-            t.insert("1.0", "Auto fan control on")
-
-            if 0 <= cpu_temp1 < 30:
-                fans_2160()
+            if 0 <= cpu_temp1  < 30:
+                t3 = Thread(target=fans_2160())
+                t3.start()
                 t = Text(root, width=65, height=5, bg=textbox_bg_color, fg=text_font_color)
                 t.grid(column=0, row=12, pady=20)
-                t.insert("1.0", "Auto fan control active at 2160")
+                t.insert("1.0", "Auto fan control active at 2160rpm")
 
             elif 31 <= cpu_temp1 < 39:
-                fans_3840()
+                t3 = Thread(target=fans_3840())
+                t3.start()
                 t = Text(root, width=65, height=5, bg=textbox_bg_color, fg=text_font_color)
                 t.grid(column=0, row=12, pady=20)
                 t.insert("1.0", "Auto fan control active at 3840rpm")
 
             elif 40 <= cpu_temp1 < 44:
-                fans_5880()
+                t3 = Thread(target=fans_5880())
+                t3.start()
                 t = Text(root, width=65, height=5, bg=textbox_bg_color, fg=text_font_color)
                 t.grid(column=0, row=12, pady=20)
                 t.insert("1.0", "Auto fan control active at 5880rpm")
 
             elif 45 <= cpu_temp1 < 49:
-                fans_8520()
+                t3 = Thread(target=fans_8520())
+                t3.start()
                 t = Text(root, width=65, height=5, bg=textbox_bg_color, fg=text_font_color)
                 t.grid(column=0, row=12, pady=20)
                 t.insert("1.0", "Auto fan control active at 8520rpm")
 
             elif 50 <= cpu_temp1 < 54:
-                fans_10920()
+                t3 = Thread(target=fans_10920())
+                t3.start()
                 t = Text(root, width=65, height=5, bg=textbox_bg_color, fg=text_font_color)
                 t.grid(column=0, row=12, pady=20)
                 t.insert("1.0", "Auto fan control active at 10920rpm")
 
             elif 55 <= cpu_temp1 < 59:
-                fans_13000()
+                t3 = Thread(target=fans_13000())
+                t3.start()
                 t = Text(root, width=65, height=5, bg=textbox_bg_color, fg=text_font_color)
                 t.grid(column=0, row=12, pady=20)
                 t.insert("1.0", "Auto fan control active at 13000rpm")
 
             elif 60 <= cpu_temp1 < 64:
-                fans_15600()
+                t3 = Thread(target=fans_15600())
+                t3.start()
                 t = Text(root, width=65, height=5, bg=textbox_bg_color, fg=text_font_color)
                 t.grid(column=0, row=12, pady=20)
                 t.insert("1.0", "Auto fan control active at 15600rpm")
 
             elif cpu_temp1  >= 65:
-                fans_17640()
+                t3 = Thread(target=fans_17640())
+                t3.start()
                 t = Text(root, width=65, height=5, bg=textbox_bg_color, fg=text_font_color)
                 t.grid(column=0, row=12, pady=20)
                 t.insert("1.0", "Auto fan control active at 17640rpm")
 
             else:
                 pass
-            root.after(4000, auto_fan_control)
+            root.after(4000, auto_fan_control_thread)
+
 
     except ValueError:
             t = Text(root, width=65, height=5, bg=textbox_bg_color, fg=text_font_color)
             t.grid(column=0, row=12, pady=20)
             t.insert("1.0", "CPU Temp is not currently active. Is the system on?")
-            pass
+            root.after(4000, auto_fan_control_thread)
+
 
 def fans_to_manual():
-    t = Text(root, width=65, height=5, bg=textbox_bg_color, fg=text_font_color)
-    t.grid(column=0, row=12, pady=20)
-    t.insert("1.0", "Fan speed under user control")
     b10.config(state='NORMAL')
     b11.config(state='NORMAL')
     b12.config(state='NORMAL')
@@ -328,7 +341,7 @@ def switch_button_state_on():
 def about():
     file_window = Toplevel(root)
     file_window.geometry('150x50')
-    ttk.Label(file_window, text="Version 1.04", anchor=CENTER).grid(column=0, row=0)
+    ttk.Label(file_window, text="Version 1.05", anchor=CENTER).grid(column=0, row=0)
     ttk.Label(file_window, text="Created by Aaron Riggs", anchor=CENTER).grid(column=0, row=1)
 
 #user credentials
@@ -385,7 +398,7 @@ rb1 = Radiobutton(frm, text='Manual Fans', width=11,  variable=user_selected_fan
                   value=1, state="disabled", command=fans_to_manual)
 rb1.grid(column=5, row=4)
 rb2 = Radiobutton(frm, text='Auto Fans', width=11, variable=user_selected_fan_curve,
-                  value=2, state="disabled", command=auto_fan_control)
+                  value=2, state="disabled", command=auto_fan_control_thread)
 rb2.grid(column=6, row=4)
 
 #menu bar
