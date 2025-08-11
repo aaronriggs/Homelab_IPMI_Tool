@@ -12,6 +12,7 @@ Verified to work with Ubuntu 24.04LTS and Mac OS 15.3.2
 Requires the following:
 
 Python 3.12.3
+Python3-tk
 
 IPMItool - Version 1.8.19
 https://github.com/ipmitool/ipmitool
@@ -27,7 +28,7 @@ IDRAC Credentials
 Current Development:
 
 
-Please bear with me as I upload additional documentation, features and bug fixes. 
+Please bare with me as I upload additional documentation, features and bug fixes. 
 
 Currently working to make this MacOS compatible. 
 
