@@ -1,5 +1,3 @@
-#copy made and moved to new project ipmi_tool_v2
-#planning massive rework with custom profiles
 import subprocess
 import threading
 from threading import Thread
