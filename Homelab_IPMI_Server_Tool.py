@@ -1,15 +1,16 @@
+#copy made and moved to new project ipmi_tool_v2
+#planning massive rework with custom profiles
 import subprocess
 import threading
 from threading import Thread
-from tkinter import ttk
-from tkinter import Text, Radiobutton, Menu, IntVar, Toplevel, CENTER, NORMAL, Tk
+from tkinter import Text, Radiobutton, Menu, IntVar, Toplevel, CENTER, NORMAL, Tk, ttk
 
 #tkinter setup
 root = Tk()
 root.title("Homelab IPMI Server Management Tool")
 frm = ttk.Frame(root, padding=20)
 frm.grid()
-textbox_bg_color= "white"
+textbox_bg_color = "white"
 text_font_color = "black"
 
 #functions
@@ -180,6 +181,7 @@ def fans_17640():
 
 def get_stats_thread():
     t1=Thread(target=get_stats)
+    t1.daemon = True
     t1.start()
     # mythreads = threading.enumerate()
     # print(mythreads)
@@ -201,6 +203,7 @@ def get_stats():
 
 def auto_fan_control_thread():
     t2=Thread(target=auto_fan_control)
+    t2.daemon = True
     t2.start()
 
 def auto_fan_control():
@@ -232,6 +235,7 @@ def auto_fan_control():
 
             if 0 <= cpu_temp1  < 30:
                 t3 = Thread(target=fans_2160())
+                t3.daemon = True
                 t3.start()
                 t = Text(root, width=65, height=5, bg=textbox_bg_color, fg=text_font_color)
                 t.grid(column=0, row=12, pady=20)
@@ -239,6 +243,7 @@ def auto_fan_control():
 
             elif 31 <= cpu_temp1 < 39:
                 t3 = Thread(target=fans_3840())
+                t3.daemon = True
                 t3.start()
                 t = Text(root, width=65, height=5, bg=textbox_bg_color, fg=text_font_color)
                 t.grid(column=0, row=12, pady=20)
@@ -246,6 +251,7 @@ def auto_fan_control():
 
             elif 40 <= cpu_temp1 < 44:
                 t3 = Thread(target=fans_5880())
+                t3.daemon = True
                 t3.start()
                 t = Text(root, width=65, height=5, bg=textbox_bg_color, fg=text_font_color)
                 t.grid(column=0, row=12, pady=20)
@@ -253,6 +259,7 @@ def auto_fan_control():
 
             elif 45 <= cpu_temp1 < 49:
                 t3 = Thread(target=fans_8520())
+                t3.daemon = True
                 t3.start()
                 t = Text(root, width=65, height=5, bg=textbox_bg_color, fg=text_font_color)
                 t.grid(column=0, row=12, pady=20)
@@ -260,6 +267,7 @@ def auto_fan_control():
 
             elif 50 <= cpu_temp1 < 54:
                 t3 = Thread(target=fans_10920())
+                t3.daemon = True
                 t3.start()
                 t = Text(root, width=65, height=5, bg=textbox_bg_color, fg=text_font_color)
                 t.grid(column=0, row=12, pady=20)
@@ -267,6 +275,7 @@ def auto_fan_control():
 
             elif 55 <= cpu_temp1 < 59:
                 t3 = Thread(target=fans_13000())
+                t3.daemon = True
                 t3.start()
                 t = Text(root, width=65, height=5, bg=textbox_bg_color, fg=text_font_color)
                 t.grid(column=0, row=12, pady=20)
@@ -274,6 +283,7 @@ def auto_fan_control():
 
             elif 60 <= cpu_temp1 < 64:
                 t3 = Thread(target=fans_15600())
+                t3.daemon = True
                 t3.start()
                 t = Text(root, width=65, height=5, bg=textbox_bg_color, fg=text_font_color)
                 t.grid(column=0, row=12, pady=20)
@@ -281,6 +291,7 @@ def auto_fan_control():
 
             elif cpu_temp1  >= 65:
                 t3 = Thread(target=fans_17640())
+                t3.daemon = True
                 t3.start()
                 t = Text(root, width=65, height=5, bg=textbox_bg_color, fg=text_font_color)
                 t.grid(column=0, row=12, pady=20)
@@ -290,15 +301,17 @@ def auto_fan_control():
                 pass
             root.after(4000, auto_fan_control_thread)
 
-
     except ValueError:
             t = Text(root, width=65, height=5, bg=textbox_bg_color, fg=text_font_color)
             t.grid(column=0, row=12, pady=20)
-            t.insert("1.0", "CPU Temp is not currently active. Is the system on?")
+            t.insert("1.0", "CPU Temp is not currently reporting. Is the system on?")
             root.after(4000, auto_fan_control_thread)
 
 
 def fans_to_manual():
+    t = Text(root, width=65, height=5, bg=textbox_bg_color, fg=text_font_color)
+    t.grid(column=0, row=12, pady=20)
+    t.insert("1.0", "Manual fan control selected. Please select a fan speed.")
     b10.config(state='NORMAL')
     b11.config(state='NORMAL')
     b12.config(state='NORMAL')
@@ -341,8 +354,9 @@ def switch_button_state_on():
 def about():
     file_window = Toplevel(root)
     file_window.geometry('150x50')
-    ttk.Label(file_window, text="Version 1.05", anchor=CENTER).grid(column=0, row=0)
+    ttk.Label(file_window, text="Version 1.07", anchor=CENTER).grid(column=0, row=0)
     ttk.Label(file_window, text="Created by Aaron Riggs", anchor=CENTER).grid(column=0, row=1)
+
 
 #user credentials
 ttk.Label(frm, text="IP Address").grid(row=0, column=0, padx=15)
@@ -406,9 +420,10 @@ menu_bar = Menu(root)
 root.config(menu=menu_bar)
 file_menu = Menu(menu_bar, tearoff=0)
 menu_bar.add_cascade(label="File", menu=file_menu)
-file_menu.add_command(label="Exit", command=root.quit)
+file_menu.add_command(label="Exit", command=root.destroy) #changed from quit
 help_menu = Menu(menu_bar, tearoff=0)
 menu_bar.add_cascade(label="Help", menu=help_menu)
 help_menu.add_command(label="About...", command=about)
 
-root.mainloop()
+if __name__ == '__main__':
+    root.mainloop()
