@@ -22,6 +22,6 @@ Requires the following:
 Current Development:
 
 
-Please bare with me as I upload additional documentation, features and bug fixes. 
+Please bear with me as I upload additional documentation, features and bug fixes. 
 
 Ultimate project goal: Allow user defined profiles for any server managed over a network. 
