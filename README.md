@@ -11,19 +11,12 @@ Verified to work with Ubuntu 24.04LTS and Mac OS 15.3.2 - 15.6.1
 
 Requires the following:
 
-Python 3.12.3
-
-Python3-tk
-
-IPMItool - Version 1.8.19
-https://github.com/ipmitool/ipmitool
-
-FreeIPMI - Version 1.6.13
-https://www.gnu.org/software/freeipmi/
-
-IDRAC Credentials
-
-IP Address
+- Python 3.12.3
+- Python3-tk
+- IPMItool - Version 1.8.19 found [here.](https://github.com/ipmitool/ipmitool)
+- FreeIPMI - Version 1.6.13 found [here.](https://www.gnu.org/software/freeipmi/)
+- IDRAC Credentials
+- IP Address
 
 
 Current Development:
