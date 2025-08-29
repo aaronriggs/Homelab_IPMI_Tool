@@ -224,8 +224,6 @@ def auto_fan_control_thread():
 fan_state = [0] # stores previously used fan state
 def auto_fan_control():
     try:
-        print(cpu_temp1)
-        print(type(cpu_temp1))
         if cpu_temp1[0] == '  ':
             return
         else:
