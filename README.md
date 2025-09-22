@@ -39,7 +39,9 @@ Now for some "light" reading.
 
 First and foremost, please be secure.
 
-Please follow security conventions and place your BMC on a management VLAN that is not internet accessible. A managed switch is $40. Please help combat botnets and spam by securing your equipment. IPMI does NOT give robust protections to credentials. Please see this [CVE](https://www.cvedetails.com/cve/CVE-2013-4786/) . I created this application as a standalone tool for this reason. If you are airgapped, this is perfect. I am also not a fan of web based tools(at this time). Memory footprint is 11mb on my system. 
+Please follow security conventions and place your BMC on a management VLAN that is not internet accessible. A managed switch is $40. Please help combat botnets and spam by securing your equipment. IPMI does NOT give robust protections to credentials. Please see this [CVE](https://www.cvedetails.com/cve/CVE-2013-4786/) . 
+
+I created this application as a standalone tool for this reason. If you are airgapped, this is perfect. I am also not a fan of web based tools(at this time). Memory footprint is 11mb on my system. 
 
 #
 
@@ -71,6 +73,7 @@ On first use, if no IPMI commands or state changes have been previously made to 
 # More important information:
 
 Default Dell PCI-E Profile Off - this state persists, even after a shutdown. It does not need to be re-issued each time the tool is used. I do not know if this persists if power is removed. 
+
 User Fan Control On - this state persists, even after a shutdown. It does not need to be re-issued each time the tool is used. I do not know if this persists if power is removed. 
 
 If you close the application or if it crashes while in use and the server is still on:
