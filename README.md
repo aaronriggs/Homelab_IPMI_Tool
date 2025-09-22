@@ -69,6 +69,14 @@ On first use, if no IPMI commands or state changes have been previously made to 
 - Select Manual Fans and a fan speed or Auto Fans for automatic temperature control
 
 
+After first use:
+- Query Power Status or just issue Power On
+- Select System Stats
+- Select Auto Fans
+
+Done. 
+
+
 
 # More important information:
 
