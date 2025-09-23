@@ -1,0 +1,38 @@
+After I made my post on Reddit for this project, I was given fantastic advice and assistance by members of r/homelab and r/learnpython. 
+
+Thank you for the assistnace everyone. 
+
+
+
+Application considerations for improvement:
+
+u/trekxtrider - maintain state between full power loss events, using either my app or add to the bash script found at: https://www.reddit.com/r/homelab/comments/mvmub3/a_way_to_silence_a_dell_server/
+
+
+Application considerations for other manufacturers:  
+
+u/LovesNatureMost - HPE iLO functionality - iLO4 is last manually controllable version 
+
+u/w4drone - For discussing oracle X servers 
+
+
+UI/UX improvements:
+
+u/MXNPD - suggestion to add better descriptors for fan speed (percentage based vs rpm)
+
+ 
+
+Packaging for release:
+
+u/DamnFog - add installation instructions and consider .deb/rpm for packaging
+
+
+
+Documentation suggestions:
+
+u/DamnFog - add installation instructions   
+
+
+
+Continued Python learning: 
+u/jpgoldberg - Suggestion to continue learning the differences between class variables and instance variables (will help with multiple views in this app) 
