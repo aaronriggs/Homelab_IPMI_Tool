@@ -1,8 +1,10 @@
-#Version 1.16
+#Version 1.19
+
 import subprocess
 from threading import Thread
 import tkinter as tk
 from tkinter import Text, ttk
+from tktooltip import ToolTip
 
 def main():
     app = Application()
@@ -50,13 +52,13 @@ class Model:
         self.pipe = subprocess.run(["ipmitool", "-I", "lanplus", "-H", self.creds[0], "-U", self.creds[1],
                                "-P", self.creds[2], "raw", "0x30", "0xce", "0x00", "0x16", "0x05", "0x00",
                                "0x00", "0x00", "0x05", "0x00", self.pci_commanded_status, "0x00", "0x00"],
-                              capture_output=True)
+                              capture_output=False)
 
     def fan_mode(self, fan_profile_commanded_status): # uses default dell fan curve or user control of fans
         self.fan_profile_commanded_status = fan_profile_commanded_status
         self.pipe = subprocess.run(["ipmitool", "-I", "lanplus", "-H", self.creds[0], "-U", self.creds[1],
                                "-P", self.creds[2], "raw", "0x30", "0x30", "0x01",
-                                self.fan_profile_commanded_status], capture_output=True)
+                                self.fan_profile_commanded_status], capture_output=False)
 
     # controls Fan Speed RPM, whether manually selected OR issued by Model.auto_fan_control
     def fan_speed(self, fan_speed_commanded_status):
@@ -212,6 +214,7 @@ class View(ttk.Frame):
         self.credentials = []
         self.radio_button_selected = 0
         self.controller = None
+        self.fan_names = 0
         # create widgets
         self.textbox_bg_color = "white"
         self.text_font_color = "black"
@@ -241,28 +244,28 @@ class View(ttk.Frame):
         self.power_mode_button_clicked("on", "Power On"), state="enabled")
         self.b4 = ttk.Button(self, text="Power Off", width=11, command=lambda:
             self.power_mode_button_clicked("off", "Power Off"), state="enabled")
-        self.b19 = ttk.Button(self, text="Reboot", width=11, command=lambda:
-            self.power_mode_button_clicked("reset", "Warm Reset"), state="enabled")
         self.b18 = ttk.Button(self, text="Power Status", width=11,
             command=lambda: self.power_mode_button_clicked("status", "Power Status"),
             state="enabled")
+        self.b19 = ttk.Button(self, text="Reboot", width=11, command=lambda:
+            self.power_mode_button_clicked("reset", "Warm Reset"), state="enabled")
         # system stats buttons
-        self.b5 = ttk.Button(self, text="System Stats", width=11, command=self.system_stats_clicked,
-            state="enabled")
+        self.b5 = tk.Button(self, text="System Stats", width=8, command=self.system_stats_clicked,
+            state="normal")
         self.sys_stats_label = ttk.Label(self, text="<-- Select System Stats to enable fan control.",
             foreground='green')
         # pci-e cooling profile buttons, state persists
-        self.b6 = ttk.Button(self, text="Default Dell PCI-E Profile On", width=30, command=lambda:
+        self.b6 = ttk.Button(self, text="Default Dell PCI-E Fan Profile On", width=30, command=lambda:
             self.pci_button_clicked("0x00", "Default Dell PCI-E Profile On"),
             state="enabled")
-        self.b7 = ttk.Button(self, text="Default Dell PCI-E Profile Off", width=30, command=lambda:
+        self.b7 = ttk.Button(self, text="Default Dell PCI-E Fan Profile Off", width=30, command=lambda:
             self.pci_button_clicked("0x01", "Default Dell PCI-E Profile Off"),
             state="enabled")
         # buttons allowing default or user fan control, state persists
-        self.b8 = ttk.Button(self, text="User Fan Control On", width=20,
+        self.b8 = ttk.Button(self, text="User Fan Control On", width=18,
             command=lambda: self.system_fan_control_clicked("0x00", "User Fan Control On"),
             state="enabled")
-        self.b9 = ttk.Button(self, text="Dell Fan Control On", width=20,
+        self.b9 = ttk.Button(self, text="Dell Fan Control On", width=18,
             command=lambda: self.system_fan_control_clicked("0x01", "Dell Fan Control On"),
             state="enabled")
         # fan speed buttons
@@ -282,7 +285,9 @@ class View(ttk.Frame):
             self.manual_fan_speed_clicked("0x59", "15600"), state="enabled")
         self.b17 = ttk.Button(self, text="Fans at 17640", width=11, command=lambda:
             self.manual_fan_speed_clicked("0x64", "17640"), state="enabled")
-        # informational windows
+        self.b20_change_fan_txt_to_p = ttk.Button(self, width=20, command=lambda:
+            self.change_fan_txt_clicked(self.fan_names), state="enabled")
+        # informational windows, undo=False critical to not store previous messages displayed (memory leak)
         self.gs = Text(self, width=65, height=12, bg=self.textbox_bg_color, fg=self.text_font_color, undo=False)
         self.ew = Text(self, width=65, height=5, bg=self.textbox_bg_color, fg=self.text_font_color, undo=False)
         # manual fan speed or auto fan control selection (now as buttons)
@@ -290,6 +295,165 @@ class View(ttk.Frame):
                                state="normal")
         self.rb2 = tk.Button(self, text='Auto Fans', width=9, command=self.enable_auto_fan_control,
                                state="normal")
+        # tooltips to provide much better context to button functions and remove ambiguity 
+        #(God is this hideous, condense in next version)
+        power_on_tooltip = \
+            ("Power On\n\nCommand issued:\nipmitool -I lanplus -H IPaddress -U username -P password  "
+             "power on\n\nDescription:\nPowers on the system.  ")
+        power_off_tooltip = \
+            ("Power Off\n\nCommand issued:\nipmitool -I lanplus -H IPaddress -U username -P password  "
+             "power off\n\nDescription:\nPowers off the system.  ")
+        reboot_tooltip = \
+            ("Reboot\n\nCommand issued:\nipmitool -I lanplus -H IPaddress -U username -P password  "
+             "reset\n\nDescription:\nPerforms a warm reboot of the system.  ")
+        power_status_tooltip = \
+            ("Power Status\n\nCommand issued:\nipmitool -I lanplus -H IPaddress -U username -P "
+             "password  power status\n\nDescription:\nRequests current power status of the system.")
+        system_stats_tooltip = \
+            ("System Stats\n\nCommand issued:\nipmi-sensors -h IPaddress -u username -p password -l "
+            "user -D LAN_2_0\n--record-ids=14,15,16,17,18,19,20,25,26,27,98\n\nDescription:\n"
+            "Displays system statistics such as fan speed in RPM, CPU 1 and 2 temperature,\ninlet "
+            "and outlet air temperature, and power consumption.\nTemperatures are displayed in Celsius.")
+        pcie_on_tooltip = \
+            ("Default Dell PCI-E Fan Profile On\n\nCommand issued:\nipmitool -I lanplus -H IPaddress -U "
+            "username -P password\nraw 0x30 0xce 0x00 0x16 0x05 0x00 0x00 0x00 0x05 0x00 0x00 0x00 0x00\n\n"
+            "Description:\nEnables the default Dell cooling profile for PCI-E devices.\n\nDefault state:\n"
+            "Enabled\n\nAdditional info:\nDisable to allow manual fan control. State is persistent between "
+            "shutdowns ONLY.\nIf power is removed or lost, system will revert to this default state.")
+        pcie_off_tooltip = \
+            ("Default Dell PCI-E Fan Profile Off\n\nCommand issued:\nipmitool -I lanplus -H IPaddress -U "
+            "username -P password\nraw 0x30 0xce 0x00 0x16 0x05 0x00 0x00 0x00 0x05 0x00 0x01 0x00 0x00\n\n"
+            "Description:\nDisables the default Dell cooling profile for PCI-E devices.\n\nDefault state:\n"
+            "Disabled\n\nAdditional info:\nDisables the default Dell PCI-E cooling profile. State is persistent "
+            "between\nshutdowns ONLY. If power is removed or lost, system will revert to the default\n"
+            "Dell PCI-E cooling profile. If this option is not selected and your system\ncontains an "
+            "unrecognized PCI-E component, fan speed defaults to 80% and\nno manaul fan control is "
+            "possible. Enable this to allow manual fan control.")
+        fan_control_on_tooltip = \
+            ("Dell Fan Control On\n\nCommand issued:\nipmitool -I lanplus -H IPaddress -U username "
+            "-P password raw 0x30 0x30 0x01 0x01\n\nDescription:\nEnables the default Dell fan control "
+            "and temperature curve.\n\nDefault state:\nEnabled\n\nAdditional info:\nEnables the default "
+            "Dell fan control and temperature control profile. State is persistent between\nshutdowns "
+            "ONLY. If power is removed or lost, the system will return to this default state.\nDisable "
+            "to allow manual fan control.")
+        fan_control_off_tooltip = \
+            ("User Fan Control On\n\nCommand issued:\nipmitool -I lanplus -H IPaddress -U username "
+            "-P password raw 0x30 0x30 0x01 0x00\n\nDescription:\nDisables the default Dell fan control "
+            "and temperature curve, allowing manual user control. \n\nDefault state:\nDisabled\n\n"
+            "Additional info:\nDisables the default Dell fan control and temperature control profile, "
+            "allowing manual user control.\nState is persistent between shutdowns ONLY. If power "
+            "is removed or lost, the system will return to\nit's default state. Enable this to allow "
+            "manual fan control.")
+        fans_to_2160_tooltip = \
+            ("Fans at 2160\n\nCommand issued:\nipmitool -I lanplus -H IPaddress -U username -P password "
+            "raw 0x30 0x30 0x02 0xff 0x00\n\nDescription:\nCommands server fans to 2160rpm. State is "
+            "persistent between shutdowns ONLY.\nIf power is removed or lost, system will revert to "
+            "Default Dell Fan Control and the\ndefault temperature curve.\n\nAdditional Info:\nLowest "
+            "available fan speed. Equivalent to 10% fan speed.\nIf this application crashes or network "
+            "connection is lost, this selected speed will be\nthe persistent fan speed until manually adjusted again.")
+        fans_to_3840_tooltip = \
+            ("Fans at 3840\n\nCommand issued:\nipmitool -I lanplus -H IPaddress -U username -P password "
+            "raw 0x30 0x30 0x02 0xff 0x0a\n\nDescription:\nCommands server fans to 3840rpm. State is "
+            "persistent between shutdowns ONLY.\nIf power is removed or lost, system will revert to "
+            "Default Dell Fan Control and the\ndefault temperature curve.\n\nAdditional Info:\nEquivalent "
+            "to 20% fan speed.\nIf this application crashes or network connection is lost, this selected "
+            "speed will be\nthe persistent fan speed until manually adjusted again.")
+        fans_to_5880_tooltip = \
+            ("Fans at 5880\n\nCommand issued:\nipmitool -I lanplus -H IPaddress -U username -P password "
+            "raw 0x30 0x30 0x02 0xff 0x19\n\nDescription:\nCommands server fans to 5880rpm. State is "
+            "persistent between shutdowns ONLY.\nIf power is removed or lost, system will revert to "
+            "Default Dell Fan Control and the\ndefault temperature curve.\n\nAdditional Info:\nEquivalent "
+            "to 35% fan speed.\nIf this application crashes or network connection is lost, this selected "
+            "speed will be\nthe persistent fan speed until manually adjusted again.")
+        fans_to_8520_tooltip = \
+            ("Fans at 8520\n\nCommand issued:\nipmitool -I lanplus -H IPaddress -U username -P password "
+            "raw 0x30 0x30 0x02 0xff 0x29\n\nDescription:\nCommands server fans to 8520rpm. State is "
+            "persistent between shutdowns ONLY.\nIf power is removed or lost, system will revert to "
+            "Default Dell Fan Control and the\ndefault temperature curve.\n\nAdditional Info:\nEquivalent "
+            "to 50% fan speed.\nIf this application crashes or network connection is lost, this selected "
+            "speed will be\nthe persistent fan speed until manually adjusted again.")
+        fans_to_10920_tooltip = \
+            ("Fans at 10920\n\nCommand issued:\nipmitool -I lanplus -H IPaddress -U username -P password "
+             "raw 0x30 0x30 0x02 0xff 0x39\n\nDescription:\nCommands server fans to 10920rpm. State is "
+             "persistent between shutdowns ONLY.\nIf power is removed or lost, system will revert to "
+             "Default Dell Fan Control and the\ndefault temperature curve.\n\nAdditional Info:\nEquivalent "
+             "to 60% fan speed.\nIf this application crashes or network connection is lost, this selected "
+             "speed will be\nthe persistent fan speed until manually adjusted again.")
+        fans_to_13000_tooltip = \
+            ("Fans at 13000\n\nCommand issued:\nipmitool -I lanplus -H IPaddress -U username -P password "
+             "raw 0x30 0x30 0x02 0xff 0x49\n\nDescription:\nCommands server fans to 13000rpm. State is "
+             "persistent between shutdowns ONLY.\nIf power is removed or lost, system will revert to "
+             "Default Dell Fan Control and the\ndefault temperature curve.\n\nAdditional Info:\nEquivalent "
+             "to 75% fan speed.\nIf this application crashes or network connection is lost, this selected "
+             "speed will be\nthe persistent fan speed until manually adjusted again.")
+        fans_to_15600_tooltip = \
+            ("Fans at 15600\n\nCommand issued:\nipmitool -I lanplus -H IPaddress -U username -P password "
+             "raw 0x30 0x30 0x02 0xff 0x59\n\nDescription:\nCommands server fans to 15600rpm. State is "
+             "persistent between shutdowns ONLY.\nIf power is removed or lost, system will revert to "
+             "Default Dell Fan Control and the\ndefault temperature curve.\n\nAdditional Info:\nEquivalent "
+             "to 90% fan speed.\nIf this application crashes or network connection is lost, this selected "
+             "speed will be\nthe persistent fan speed until manually adjusted again.")
+        fans_to_17640_tooltip = \
+            ("Fans at 17640\n\nCommand issued:\nipmitool -I lanplus -H IPaddress -U username -P password "
+             "raw 0x30 0x30 0x02 0xff 0x64\n\nDescription:\nCommands server fans to 17640rpm. State is "
+             "persistent between shutdowns ONLY.\nIf power is removed or lost, system will revert to "
+             "Default Dell Fan Control and the\ndefault temperature curve.\n\nAdditional Info:\nMaximum "
+             "available fan speed. Equivalent to 100% fan speed.\nIf this application crashes or network "
+             "connection is lost, this selected speed will be\nthe persistent fan speed until manually "
+             "adjusted again.")
+        rb1_manual_fans_tooltip = \
+            ("Manual Fans\n\nCommand issued:\nNone. Commands are issued by user once fan speed buttons "
+            "are enabled.\n\nDescription:\nEnables the user to select a single fan speed. See individual "
+            "fan speed buttons for details.")
+        rb2_auto_fans_tooltip = \
+            ("Auto Fans\n\nCommand issued:\nAutomatically issues manual fan speed commands based on CPU\n"
+             "temperature from a pre-defined fan curve.\n\nEffectively:\nIf CPU temp is between x and y, "
+             "command fans to xyz speed.\n\nTemperature Range and Fan speed values:\n0 - 30C - Fans at 2160rpm or 10%\n"
+             "31 - 39C - Fans at 3840rpm or 20%\n40 - 44C - Fans at 5880rpm or 35%\n45 - 49C - Fans at 8520rpm or 50%\n"
+             "50 - 54C - Fans at 10920rpm or 60%\n55 - 59C - Fans at 13000rpm or 75%\n60 - 64C - Fans at 15600rpm or 90%\n"
+             "65C and above - Fans at 17640rpm or 100%\n\nAdditional Information:\nWARNING:\nAutomatic "
+             "temperature control functions while application is running ONLY.\nLast commanded fan speed "
+             "before application crash or closure will remain active.\nPower loss or power removal will "
+             "reset system to Default Dell Fan Control On.\nPlease configure iDRAC for a high temperature "
+             "shutdown as a failsafe.")
+        ToolTip(self.b3, msg=power_on_tooltip, delay=0.5, parent_kwargs={"bg": "black", "padx": 5, "pady": 5},
+                fg="#000000", bg="#f4f4f4", padx=10, pady=10, refresh=50.0)
+        ToolTip(self.b4, msg=power_off_tooltip, delay=0.5, parent_kwargs={"bg": "black", "padx": 5, "pady": 5},
+                fg="#000000", bg="#f4f4f4", padx=10, pady=10, refresh=50.0)
+        ToolTip(self.b5, msg=system_stats_tooltip, delay=0.5, parent_kwargs={"bg": "black", "padx": 5, "pady": 5},
+                fg="#000000", bg="#f4f4f4", padx=10, pady=10, refresh=50.0)
+        ToolTip(self.b6, msg=pcie_on_tooltip, delay=0.5, follow=False, parent_kwargs={"bg": "black", "padx": 5, "pady": 5},
+                fg="#000000", bg="#f4f4f4", padx=10, pady=10, x_offset=-150, refresh=50.0)
+        ToolTip(self.b7, msg=pcie_off_tooltip, delay=0.5, follow=False, parent_kwargs={"bg": "black", "padx": 5, "pady": 5},
+                fg="#000000", bg="#f4f4f4", padx=10, pady=10, x_offset=-150, refresh=50.0)
+        ToolTip(self.b8, msg=fan_control_off_tooltip, delay=0.5, follow=False, parent_kwargs={"bg": "black", "padx": 5, "pady": 5},
+                fg="#000000", bg="#f4f4f4", padx=10, pady=10, x_offset=-450, refresh=50.0)
+        ToolTip(self.b9, msg=fan_control_on_tooltip, delay=0.5,follow=False, parent_kwargs={"bg": "black", "padx": 5, "pady": 5},
+                fg="#000000", bg="#f4f4f4", padx=10, pady=10, x_offset=-450, refresh=50.0)
+        ToolTip(self.b10, msg=fans_to_2160_tooltip, delay=0.5, follow=False, parent_kwargs={"bg": "black", "padx": 5, "pady": 5},
+                fg="#000000", bg="#f4f4f4", padx=10, pady=10, x_offset=-450, refresh=50.0)
+        ToolTip(self.b11, msg=fans_to_3840_tooltip, delay=0.5, follow=False, parent_kwargs={"bg": "black", "padx": 5, "pady": 5},
+                fg="#000000", bg="#f4f4f4", padx=10, pady=10, x_offset=-450, refresh=50.0)
+        ToolTip(self.b12, msg=fans_to_5880_tooltip, delay=0.5, follow=False, parent_kwargs={"bg": "black", "padx": 5, "pady": 5},
+                fg="#000000", bg="#f4f4f4", padx=10, pady=10, x_offset=-450, refresh=50.0)
+        ToolTip(self.b13, msg=fans_to_8520_tooltip, delay=0.5, follow=False, parent_kwargs={"bg": "black", "padx": 5, "pady": 5},
+                fg="#000000", bg="#f4f4f4", padx=10, pady=10, x_offset=-450, refresh=50.0)
+        ToolTip(self.b14, msg=fans_to_10920_tooltip, delay=0.5, follow=False, parent_kwargs={"bg": "black", "padx": 5, "pady": 5},
+                fg="#000000", bg="#f4f4f4", padx=10, pady=10, x_offset=-650, refresh=50.0)
+        ToolTip(self.b15, msg=fans_to_13000_tooltip, delay=0.5, follow=False, parent_kwargs={"bg": "black", "padx": 5, "pady": 5},
+                fg="#000000", bg="#f4f4f4", padx=10, pady=10, x_offset=-650, refresh=50.0)
+        ToolTip(self.b16, msg=fans_to_15600_tooltip, delay=0.5, follow=False, parent_kwargs={"bg": "black", "padx": 5, "pady": 5},
+                fg="#000000", bg="#f4f4f4", padx=10, pady=10, x_offset=-650, refresh=50.0)
+        ToolTip(self.b17, msg=fans_to_17640_tooltip, delay=0.5, follow=False, parent_kwargs={"bg": "black", "padx": 5, "pady": 5},
+                fg="#000000", bg="#f4f4f4", padx=10, pady=10, x_offset=-650, refresh=50.0)
+        ToolTip(self.b18, msg=power_status_tooltip, delay=0.5, parent_kwargs={"bg": "black", "padx": 5, "pady": 5},
+                fg="#000000", bg="#f4f4f4", padx=10, pady=10, refresh=50.0)
+        ToolTip(self.b19, msg=reboot_tooltip, delay=0.5, parent_kwargs={"bg": "black", "padx": 5, "pady": 5},
+                fg="#000000", bg="#f4f4f4", padx=10, pady=10, refresh=50.0)
+        ToolTip(self.rb1, msg=rb1_manual_fans_tooltip, delay=0.5, follow=False, fg="#000000", bg="#f4f4f4",
+                parent_kwargs={"bg": "black", "padx": 5, "pady": 5}, padx=10, pady=10, x_offset=-650, refresh=50.0)
+        ToolTip(self.rb2, msg=rb2_auto_fans_tooltip, delay=0.5, follow=False, fg="#000000", bg="#f4f4f4",
+                parent_kwargs={"bg": "black", "padx": 5, "pady": 5}, padx=10, pady=10, x_offset=-650, y_offset=-100, refresh=50.0)
 
     def set_controller(self, controller):
         self.controller = controller
@@ -301,7 +465,7 @@ class View(ttk.Frame):
 
     def display_user_interface(self):
         self.label1.grid(column=3, row=5)
-        self.label2.grid(column=5, row=5, columnspan=3, sticky="nsew")
+        self.label2.grid(column=5, row=3, columnspan=3, sticky="nsew")
         self.b3.grid(column=2, row=0, sticky="W", padx=10)
         self.b4.grid(column=2, row=1, sticky="W", padx=10)
         self.b5.grid(column=0, row=4)
@@ -329,16 +493,45 @@ class View(ttk.Frame):
         self.rb1.config(relief="sunken", state="disabled") # disables manual fan control button
         self.rb2.config(relief="raised", state="normal") # enables auto fan control button
         # calling grid after a grid_forget shows buttons again (or enables them if not forgotten)
-        self.rb2.grid(column=6, row=4, sticky="W", pady=3)
         self.b10.grid(column=5, row=0, sticky="W", padx=5)
         self.b11.grid(column=5, row=1, sticky="W", padx=5)
         self.b12.grid(column=5, row=2, sticky="W", padx=5)
         self.b13.grid(column=5, row=3, sticky="W", padx=5)
-        self.b14.grid(column=6, row=0, sticky="W")
-        self.b15.grid(column=6, row=1, sticky="W")
-        self.b16.grid(column=6, row=2, sticky="W")
-        self.b17.grid(column=6, row=3, sticky="W")
+        self.b14.grid(column=6, row=0, sticky="W", padx=5)
+        self.b15.grid(column=6, row=1, sticky="W", padx=5)
+        self.b16.grid(column=6, row=2, sticky="W", padx=5)
+        self.b17.grid(column=6, row=3, sticky="W", padx=5)
+        self.rb2.grid(column=6, row=4, sticky="W", padx=5)
+        self.b20_change_fan_txt_to_p.config(text="Change Fan RPM to %")
+        self.b20_change_fan_txt_to_p.grid(column=5, row=5, sticky="NSEW", padx=5, columnspan=2)
 
+    # changes text displayed on the fan speed buttons from RPM to % and vice versa
+    def change_fan_txt_clicked(self, fan_name_state):
+        self.fan_names = fan_name_state
+        if self.fan_names == 0:
+            self.b10.config(text="Fans at 10%")
+            self.b11.config(text="Fans at 20%")
+            self.b12.config(text="Fans at 35%")
+            self.b13.config(text="Fans at 50%")
+            self.b14.config(text="Fans at 60%")
+            self.b15.config(text="Fans at 70%")
+            self.b16.config(text="Fans at 90%")
+            self.b17.config(text="Fans at 100%")
+            self.b20_change_fan_txt_to_p.config(text="Change Fan % to RPM")
+            self.fan_names = 1
+        else:
+            self.b10.config(text="Fans at 2160")
+            self.b11.config(text="Fans at 3840")
+            self.b12.config(text="Fans at 5880")
+            self.b13.config(text="Fans at 8520")
+            self.b14.config(text="Fans at 10920")
+            self.b15.config(text="Fans at 13000")
+            self.b16.config(text="Fans at 15600")
+            self.b17.config(text="Fans at 17640")
+            self.b20_change_fan_txt_to_p.config(text="Change Fan RPM to %")
+            self.fan_names = 0
+
+    # system stats running
     def enable_auto_fan_control(self):
         self.radio_button_selected = 2 # stored selection to check against and continue auto fan thread
         self.label2['text'] = ''
@@ -361,6 +554,7 @@ class View(ttk.Frame):
     def system_stats_clicked(self):
         self.rb1.config(relief="raised", state="normal")
         self.rb2.config(relief="raised", state="normal")
+        self.b5.config(relief="sunken", state="disabled")
         self.sys_stats_label.grid_forget()
         self.controller.system_stats_thread()
     def system_stats_message(self, message):
@@ -385,20 +579,20 @@ class View(ttk.Frame):
     # system power management (4 buttons route here)
     def power_mode_button_clicked(self, selected_power_mode, human_var):
         self.human_var, self.selected_power_mode = human_var, selected_power_mode
-        self.pipe_message(f"Power setting: {self.human_var} selected. Enabling...")
+        self.pipe_message(f"Power setting: {self.human_var} selected.")
         # call controller thread method and pass in desired controller method and the var used to issue command
         self.controller.one_thread_to_rule_them_all(self.controller.power_mode, self.selected_power_mode)
 
     # pci-e cooling management (2 buttons route here)
     def pci_button_clicked(self, system_pci_fan_control, human_var):
         self.human_var, self.system_pci_fan_control = human_var, system_pci_fan_control
-        self.pipe_message(f"PCI-E settings: {self.human_var} selected. Enabling...")
+        self.pipe_message(f"PCI-E settings: {self.human_var} selected.")
         self.controller.one_thread_to_rule_them_all(self.controller.pci_mode, self.system_pci_fan_control)
 
     # default or user fan control (2 buttons route here)
     def system_fan_control_clicked(self, system_manual_fan_control, human_var):
         self.human_var, self.system_manual_fan_control = human_var, system_manual_fan_control
-        self.pipe_message(f"System Fan profile: {self.human_var} selected. Enabling...")
+        self.pipe_message(f"System Fan profile: {self.human_var} selected.")
         self.controller.one_thread_to_rule_them_all(self.controller.fan_mode, self.system_manual_fan_control)
 
     # manual fan speed controls (8 buttons route here)
