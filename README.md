@@ -26,6 +26,7 @@ Requires the following dependancies:
 
 - Python 3.12.3
 - Python3-tk
+- tkinter-tooltip
 - IPMItool - Version 1.8.19 found [here.](https://github.com/ipmitool/ipmitool)
 - FreeIPMI - Version 1.6.13 found [here.](https://www.gnu.org/software/freeipmi/)
 - IDRAC Credentials
@@ -41,7 +42,7 @@ First and foremost, please be secure.
 
 Please follow security conventions and place your BMC on a management VLAN that is not internet accessible. A managed switch is $40. Please help combat botnets and spam by securing your equipment. IPMI does NOT give robust protections to credentials. Please see this [CVE](https://www.cvedetails.com/cve/CVE-2013-4786/) . 
 
-I created this application as a standalone tool for this reason. If you are airgapped, this is perfect. I am also not a fan of web based tools(at this time). Memory footprint is 11mb on my system. 
+I created this application as a standalone tool for this reason. If you are airgapped, this is perfect. I am also not a fan of web based tools(at this time). Memory footprint is 16.5mb on my system. 
 
 #
 
