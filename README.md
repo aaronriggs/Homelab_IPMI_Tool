@@ -81,9 +81,9 @@ Done.
 
 # More important information:
 
-Default Dell PCI-E Profile Off - this state persists, even after a shutdown. It does not need to be re-issued each time the tool is used. I do not know if this persists if power is removed. 
+Default Dell PCI-E Profile Off - this state persists, even after a shutdown. It does not need to be re-issued each time the tool is used. State does not persist after power is removed. 
 
-User Fan Control On - this state persists, even after a shutdown. It does not need to be re-issued each time the tool is used. I do not know if this persists if power is removed. 
+User Fan Control On - this state persists, even after a shutdown. It does not need to be re-issued each time the tool is used. State does not persist after power is removed. 
 
 If you close the application or if it crashes while in use and the server is still on:
 
